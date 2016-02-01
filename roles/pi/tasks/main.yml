@@ -96,6 +96,23 @@
 - name: "Copy mosquitto init script (slightly modified from stock version)"
   copy: src=./resources/mosquitto dest=/etc/init.d/mosquitto mode="a+x"
 
+- name: "Setup Big Red Button dev configuration"
+  copy: src=./resources/50-big-red-button.rules dest=/etc/udev/rules.d/50-big-red-button.rules mode="0644"
+
+- name: "Bring Big Red Button online"
+  command: udevadm control --reload-rules
+
+- name: "Grab driver source"
+  git: repo=https://github.com/marko8904/big_red_button.git dest="/home/pi/big_red_button" accept_hostkey="yes" force="yes"
+
+- name: "Compile driver"
+  command: gcc -o big_red_button big_red_button.c
+  args:
+    chdir: /home/pi/big_red_button
+
+- name: "Setup rc.local which runs the driver"
+  copy: src=./resources/rc.local dest=/etc/rc.local mode="a+x"
+
 # - name: "Restart mosquitto"
 #   command: /etc/init.d/mosquitto restart
 
