@@ -5,6 +5,15 @@
 - name: "Set hostname in hosts file"
   lineinfile: dest=/etc/hosts regexp='^(127.0.0.1.*localhost)' line='\1 {{hostname}}' backrefs=yes
 
+- name: "Copy mosquitto repo key to the host"
+  copy: src=./resources/mosquitto-repo.gpg.key dest=/tmp/mosquitto-repo.gpg.key
+
+- name: "Add key to apt for mosquitto repo"
+  command: apt-key add /tmp/mosquitto-repo.gpg.key
+
+- name: "Copy mosquitto source list to apt sources"
+  copy: src=./resources/mosquitto-jessie.list dest=/etc/apt/sources.list.d/mosquitto-jessie.list
+
 - name: 'Upgrade all APT packages to the latest version'
   apt: upgrade=dist update_cache=yes cache_valid_time=72000
 
@@ -65,6 +74,30 @@
 
 - name: "Set hostapd permissions"
   file: path=/usr/sbin/hostapd mode=0755
+
+- name: "Install mosquitto"
+  apt: name=mosquitto state=latest
+
+- name: "Install mosquitto-clients"
+  apt: name=mosquitto-clients state=latest
+
+- name: "Setup AWS IoT bridge conf for mosquitto"
+  template: src=./resources/awsiot.conf.j2 dest=/etc/mosquitto/conf.d/awsiot.conf
+
+- name: "Copy root certificate file for AWS IoT"
+  copy: src=./resources/aws-iot-root-ca.pem dest=/etc/mosquitto/ca_certificates/aws-iot-root-ca.pem mode="0644"
+
+- name: "Copy certificate file for AWS IoT"
+  copy: src=./resources/aws-iot-button-cert.pem dest=/etc/mosquitto/certs/aws-iot-button-cert.pem mode="0644"
+
+- name: "Copy private key file for AWS IoT"
+  copy: src=./resources/aws-iot-button-private.pem dest=/etc/mosquitto/certs/aws-iot-button-private.pem mode="0644"
+
+- name: "Copy mosquitto init script (slightly modified from stock version)"
+  copy: src=./resources/mosquitto dest=/etc/init.d/mosquitto mode="a+x"
+
+# - name: "Restart mosquitto"
+#   command: /etc/init.d/mosquitto restart
 
 - name: 'Reboot'
   command: /sbin/shutdown -r now
