@@ -1,8 +1,8 @@
 ---
 
-- name: Ansible Playbook for configuring brand new Raspberry Pi
+- name: Ansible Playbook for configuring brand new Raspberry Pi connected to a Dream Cheeky USB button
 
-  hosts: webservers
+  hosts: pies
   roles:
     - pi
   remote_user: pi

@@ -1,13 +1,71 @@
 ---
-- name: 'Configure WIFI'
-  copy: src=./wpa_supplicant.conf dest=/etc/wpa_supplicant/wpa_supplicant.conf mode=0600
+- name: "Set hostname"
+  copy: content="{{ hostname }}" dest=/etc/hostname
 
-- name: 'Update APT package cache'
-  action: apt update_cache=yes
+- name: "Set hostname in hosts file"
+  lineinfile: dest=/etc/hosts regexp='^(127.0.0.1.*localhost)' line='\1 {{hostname}}' backrefs=yes
 
-- name: 'Upgrade APT to the lastest packages'
-  action: apt upgrade=safe
+- name: 'Upgrade all APT packages to the latest version'
+  apt: upgrade=dist update_cache=yes cache_valid_time=72000
+
+- name: "Make sure wpa-supplicant is setup"
+  apt: name=wpasupplicant state=latest
+
+- name: 'Install nodejs'
+  apt: name=nodejs state=latest
+
+- name: "Install nodejs-legacy"
+  apt: name=nodejs-legacy state=latest
+
+- name: "Install npm"
+  apt: name=npm state=latest
+
+- name: "Setup bower"
+  npm: name=bower global=yes
+
+- name: "Make sure git is setup"
+  apt: name=git-core state=latest
+
+- name: "Get raspberry-wifi-conf"
+  git: repo=https://github.com/marko8904/raspberry-wifi-conf.git dest="/home/pi/raspberry-wifi-conf" accept_hostkey="yes" force="yes"
+
+- name: "Install bower modules"
+  command: bower install --allow-root
+  args:
+    chdir: /home/pi/raspberry-wifi-conf
+
+- name: "Install all npm modules"
+  npm: path=/home/pi/raspberry-wifi-conf
+
+- name: "Setup raspberry-wifi-conf driver type"
+  lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"wifi_driver_type".*)".*"(.*)$' line='\1"rtl871xdrv"\2' backrefs=yes
+
+- name: "Setup raspberry-wifi-conf AdHoc network name"
+  lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"ssid".*)".*"(.*)$' line='\1"{{hostname}}"\2' backrefs=yes
+
+- name: "Setup raspberry-wifi-conf AdHoc network pwd"
+  lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"passphrase".*)".*"(.*)$' line='\1"raspberry"\2' backrefs=yes
+
+- name: "Provision raspberry-wifi-conf resources"
+  command: npm run-script provision
+  args:
+    chdir: /home/pi/raspberry-wifi-conf
+
+- name: "Setup raspberry-wifi-conf service"
+  command: cp -RPpf "/home/pi/raspberry-wifi-conf/assets/init.d/raspberry-wifi-conf" "/etc/init.d/raspberry-wifi-conf"
+
+- name: "Set permissions for raspberry-wifi-conf service file"
+  file: path=/etc/init.d/raspberry-wifi-conf mode="a+x"
+
+- name: "Update services"
+  command: /usr/sbin/update-rc.d raspberry-wifi-conf defaults
+
+- name: "Set driver to rtl871xdrv"
+  command: cp -RPpf "/home/pi/raspberry-wifi-conf/assets/bin/hostapd.rtl871xdrv" /usr/sbin/hostapd
+
+- name: "Set hostapd permissions"
+  file: path=/usr/sbin/hostapd mode=0755
 
 - name: 'Reboot'
-  command: /sbin/reboot -t now
+  command: /sbin/shutdown -r now
 
