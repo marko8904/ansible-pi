@@ -2,7 +2,7 @@
 connection awsiot
 
 # Host and port of endpoint (your AWS IoT endpoint
-address {{ awsiotserver }}:8883
+address {{ awsiotserver }}:{{ awsiotserverport }}
 
 # Default but you should start the bridge automatically
 start_type automatic

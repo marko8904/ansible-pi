@@ -110,8 +110,20 @@
   args:
     chdir: /home/pi/big_red_button
 
-- name: "Setup rc.local which runs the driver"
-  copy: src=./resources/rc.local dest=/etc/rc.local mode="a+x"
+- name: "Setup big red button monitoring service"
+  copy: src=./resources/bigredbutton dest=/etc/init.d/bigredbutton mode="a+x"
+
+- name: "Setup big red button system service"
+  command: update-rc.d bigredbutton defaults
+
+- name: "Setup IP info script"
+  template: src=./resources/broadcast_ip_via_mqtt.j2 dest=/usr/local/bin/broadcast_ip_via_mqtt mode="a+x"
+
+- name: "Setup boot info service"
+  copy: src=./resources/broadcastRPIInfo dest=/etc/init.d/broadcastRPIInfo mode="a+x"
+
+- name: "Setup ip info broadcast on startup"
+  command: update-rc.d broadcastRPIInfo defaults
 
 # - name: "Restart mosquitto"
 #   command: /etc/init.d/mosquitto restart
