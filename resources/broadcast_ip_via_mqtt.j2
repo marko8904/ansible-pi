@@ -1,0 +1,17 @@
+#!/bin/bash
+
+while ! ping -c 1 -W 1 8.8.8.8; do
+    echo "Waiting for 8.8.8.8 - network interface might be down..."
+    sleep 1
+done
+
+if [ $# -eq 0 ]; then
+    action="pong"
+else
+   action=$1
+fi
+
+IP=$(hostname -I)
+NAME=$(hostname)
+
+mosquitto_pub -h {{ awsiotserver }} -p {{ awsiotserverport }} --cafile /etc/mosquitto/ca_certificates/aws-iot-root-ca.pem --cert /etc/mosquitto/certs/aws-iot-button-cert.pem --key /etc/mosquitto/certs/aws-iot-button-private.pem -t 'button/action' -m "{ \"id\":\"${NAME}\", \"action\":\"${action}\", \"ip\" : \"${IP}\" }"
