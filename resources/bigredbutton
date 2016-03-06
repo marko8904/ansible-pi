@@ -1,0 +1,11 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          bigredbutton
+# Required-Start:    $local_fs $syslog $network mosquitto raspberry-wifi-conf
+# Required-Stop:     $local_fs
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: big red button driver
+### END INIT INFO
+
+/home/pi/big_red_button/big_red_button &
