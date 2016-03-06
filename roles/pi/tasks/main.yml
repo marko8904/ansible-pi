@@ -125,6 +125,21 @@
 - name: "Setup ip info broadcast on startup"
   command: update-rc.d broadcastRPIInfo defaults
 
+- name: "Create SSH keys dir"
+  file: path=/home/pi/.ssh owner="pi" group="pi" state="directory" mode="0700"
+
+- name: "Setup SSH tunnel private key"
+  copy: src=./resources/ssh.private.pem dest=/home/pi/.ssh/id_rsa owner="pi" mode="0600"
+
+- name: "Setup SSH tunnel public key"
+  copy: src=./resources/ssh.public.pem dest=/home/pi/.ssh/id_rsa.pub owner="pi" mode="0600"
+
+- name: "Setup SSH tunnel service script"
+  template: src=./resources/ssh_tunnel.j2 dest=/etc/init.d/ssh_tunnel mode="a+x"
+
+- name: "Setup SSH tunnel service"
+  command: update-rc.d ssh_tunnel defaults
+
 # - name: "Restart mosquitto"
 #   command: /etc/init.d/mosquitto restart
 
