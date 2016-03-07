@@ -2,8 +2,8 @@
 ### BEGIN INIT INFO
 # Provides:          ssh_tunnel
 # Required-Start:    $local_fs $syslog $network $sshd raspberry-wifi-conf
-# Required-Stop:
-# Default-Start:     3 4 5
+# Required-Stop:     $local_fs $syslog $network
+# Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: ssh_tunnel
 ### END INIT INFO

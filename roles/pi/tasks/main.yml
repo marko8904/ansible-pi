@@ -35,6 +35,9 @@
 - name: "Make sure git is setup"
   apt: name=git-core state=latest
 
+- name: "Make sure gawk is setup"
+  apt: name=gawk state=latest
+
 - name: "Get raspberry-wifi-conf"
   git: repo=https://github.com/marko8904/raspberry-wifi-conf.git dest="/home/pi/raspberry-wifi-conf" accept_hostkey="yes" force="yes"
 
@@ -46,8 +49,8 @@
 - name: "Install all npm modules"
   npm: path=/home/pi/raspberry-wifi-conf
 
-- name: "Setup raspberry-wifi-conf driver type"
-  lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"wifi_driver_type".*)".*"(.*)$' line='\1"rtl871xdrv"\2' backrefs=yes
+# - name: "Setup raspberry-wifi-conf driver type"
+#   lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"wifi_driver_type".*)".*"(.*)$' line='\1"rtl871xdrv"\2' backrefs=yes
 
 - name: "Setup raspberry-wifi-conf AdHoc network name"
   lineinfile: dest=/home/pi/raspberry-wifi-conf/config.json regexp='^(.*"ssid".*)".*"(.*)$' line='\1"{{hostname}}"\2' backrefs=yes
@@ -69,11 +72,14 @@
 - name: "Update services"
   command: /usr/sbin/update-rc.d raspberry-wifi-conf defaults
 
-- name: "Set driver to rtl871xdrv"
-  command: cp -RPpf "/home/pi/raspberry-wifi-conf/assets/bin/hostapd.rtl871xdrv" /usr/sbin/hostapd
+# - name: "Set driver to rtl871xdrv"
+#   command: cp -RPpf "/home/pi/raspberry-wifi-conf/assets/bin/hostapd.rtl871xdrv" /usr/sbin/hostapd
 
-- name: "Set hostapd permissions"
-  file: path=/usr/sbin/hostapd mode=0755
+# - name: "Set hostapd permissions"
+#   file: path=/usr/sbin/hostapd mode=0755
+
+- name: "make sure rc.local starts hostapd (otherwise hostapd doesn't reliably start)"
+  copy: src=./resources/rc.local dest=/etc/rc.local mode="0755"
 
 - name: "Install mosquitto"
   apt: name=mosquitto state=latest

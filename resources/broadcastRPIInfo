@@ -2,7 +2,7 @@
 ### BEGIN INIT INFO
 # Provides:          broadcast_ip_via_mqtt
 # Required-Start:    $local_fs $syslog $network mosquitto raspberry-wifi-conf
-# Required-Stop:     $local_fs
+# Required-Stop:     $local_fs $syslog
 # Default-Start:     3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: broadcast_ip_via_mqtt
